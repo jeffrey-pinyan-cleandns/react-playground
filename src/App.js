@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
 export const App = () => {
     const [ clicks, setClicks ] = useState(0);
@@ -96,7 +96,7 @@ export const App = () => {
     }, [bar]);
 
 
-    const blat = useBlat(factor)
+    const blat = useBlat(factor);
 
     // This is logged only when the component is mounted, or when blat.N changes,
     // because useBlat() returns an memo-ized object.
@@ -105,33 +105,75 @@ export const App = () => {
         console.log(`blat changed`);
     }, [blat]);
 
-
     return (<>
         <h1>{id1} {id2} {id3} {id4}</h1>
-        <div>
-            You have clicked {clicks} time{clicks !== 1 && 's'}!
-        </div>
-        <button onClick={() => setClicks((c) => c+1)}>Add 1</button>
-        <button onClick={() => addClick(3)}>Add 3</button>
-        <button onClick={() => addClickCallback(5)}>Add 5</button>
+        <table cellPadding={20}>
+            <tbody>
+            <tr>
+                <td colSpan={3}>
+                    You have clicked {clicks} time{clicks !== 1 && 's'}!
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button onClick={() => setClicks((c) => c+1)}>Add 1</button>        
+                </td>
+                <td>                    
+                    <button onClick={() => addClick(3)}>Add 3</button>
+                </td>
+                <td>
+                    <button onClick={() => addClickCallback(5)}>Add 5</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
         <hr/>
-        <div>ref.current = {ref.current}</div>
-        <button onClick={() => ref.current *= 2}>Double ref.current</button>
+        <table cellPadding={20}>
+            <tbody>
+            <tr>
+                <td>
+                    <div>ref.current = {ref.current}</div>
+                    <button onClick={() => ref.current *= 2}>Double ref.current</button>
+                </td>
+                <td>
+                    <div>refMemo.current = {refMemo.current}</div>
+                    <button onClick={() => refMemo.current *= 2}>Double refMemo.current</button>
+                </td>
+                <td>
+                    <div>memo = {memo}</div>
+                    <button onClick={() => setFactor((f) => f *= 2)}>Double memo (factor = {factor})</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
         <hr/>
-        <div>refMemo.current = {refMemo.current}</div>
-        <button onClick={() => refMemo.current *= 2}>Double refMemo.current</button>
+        <table cellPadding={20}>
+            <tbody>
+            <tr>
+                <td>
+                    <div>foo.N = {foo.N} (initially based on 'factor')</div>
+                    <button onClick={() => foo.setN((n) => n + 1)}>Add 1 to foo.N</button>
+                </td>
+                <td>
+                    <div>bar.N = {bar.N} (initially based on 'factor')</div>
+                    <button onClick={() => bar.setN((n) => n + 1)}>Add 1 to bar.N</button>
+                </td>
+                <td>
+                    <div>blat.N = {blat.N} (based on 'factor')</div>
+                    <button onClick={() => blat.setN((n) => n + 1)}>Add 1 to blat.N</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
         <hr/>
-        <div>memo = {memo}</div>
-        <button onClick={() => setFactor((f) => f *= 2)}>Double memo (factor = {factor})</button>
-        <hr/>
-        <div>foo.N = {foo.N} (initially based on 'factor')</div>
-        <button onClick={() => foo.setN((n) => n + 1)}>Add 1 to foo.N</button>
-        <hr/>
-        <div>bar.N = {bar.N} (initially based on 'factor')</div>
-        <button onClick={() => bar.setN((n) => n + 1)}>Add 1 to bar.N</button>
-        <hr/>
-        <div>blat.N = {blat.N} (based on 'factor')</div>
-        <button onClick={() => blat.setN((n) => n + 1)}>Add 1 to blat.N</button>
+        <table cellPadding={20}>
+            <tbody>
+            <tr>
+                <td><Plain value={blat.N}/></td>
+                <td><Memoized value={blat.N}/></td>
+            </tr>
+            </tbody>
+        </table>
         <hr/>
         <SetState/>
     </>);
@@ -163,7 +205,7 @@ const getPi3 = () => {
 let i = 0;
 
 const useNextId = (prefix='id') => {
-    return useMemo(() => `${prefix}-${++i}`, [prefix]);
+    return useMemo(() => `${prefix}-${i++}`, [prefix]);
 };
 
 
@@ -220,19 +262,30 @@ const SetState = () => {
     const updateAge3 = useCallback((age) => setState3((state) => ({ ...state, age })), []);
     const [ age3, setAge3 ] = useProxyState(state3.age, updateAge3);
     
-    return (<>
-        <xmp>{JSON.stringify(age, null, 4)}</xmp>
-        <Age value={age} setValue={setAge}/>
-        <hr/>
-        <xmp>{JSON.stringify(state, null, 4)}</xmp>
-        <Age value={state.age} setValue={updateAge}/>
-        <hr/>
-        <xmp>{JSON.stringify(state2, null, 4)}</xmp>
-        <Age value={state2.age} setValue={updateAge2}/>
-        <hr/>
-        <xmp>{JSON.stringify(state3, null, 4)}</xmp>
-        <Age value={age3} setValue={setAge3}/>
-    </>);
+    return (
+        <table cellPadding={20}>
+            <tbody>
+            <tr>
+                <td valign="top">
+                    <xmp>{JSON.stringify(age, null, 4)}</xmp>
+                    <Age value={age} setValue={setAge}/>
+                </td>
+                <td valign="top">
+                    <xmp>{JSON.stringify(state, null, 4)}</xmp>
+                    <Age value={state.age} setValue={updateAge}/>
+                </td>
+                <td valign="top">
+                    <xmp>{JSON.stringify(state2, null, 4)}</xmp>
+                    <Age value={state2.age} setValue={updateAge2}/>
+                </td>
+                <td valign="top">
+                    <xmp>{JSON.stringify(state3, null, 4)}</xmp>
+                    <Age value={age3} setValue={setAge3}/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    );
 };
 
 const Age = ({ value, setValue }) => {
@@ -243,12 +296,27 @@ const Age = ({ value, setValue }) => {
     </div>;
 };
 
+
 const useProxyState = (remote, setRemote) => {
     const valueState = useState(remote);
     const [ value, setValue ] = valueState;
 
-    useEffect(() => setValue(remote), [remote]);
-    useEffect(() => setRemote(value), [value]);
+    useEffect(() => setValue(remote), [setValue, remote]);
+    useEffect(() => setRemote(value), [setRemote, value]);
 
     return valueState;
 };
+
+
+const Plain = ({ value }) => {
+    console.log(`Plain rendered ${value}`);
+
+    return <div>Plain: {value}</div>;
+};
+
+const Memoized = memo(({ value }) => {
+    console.log(`Memoized rendered ${value}`);
+
+    return <div>Memoized: {value}</div>;
+});
+
